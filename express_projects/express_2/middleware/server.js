@@ -1,5 +1,10 @@
 const express = require('express')
 const app = express()
+const bodyparser = require('body-parser')
+const morgan = require('morgan')
+
+app.use(morgan('dev'))
+app.use(bodyparser.json())
 app.use((req, res, next )=>{
     console.log(`${req.method}:  ${req.url}`)
     next()
@@ -18,7 +23,8 @@ app.get('/user', (req, res) => {
     res.send({msg :'User List'})
 })
 
-app.get('/accounts', (req, res, next) => {
+app.post('/accounts', (req, res, next) => {
+    console.log(req.body)
     console.log('accounts inline middleware')
     next()
 }, (req, res) => {
