@@ -1,43 +1,40 @@
 const express = require('express')
-const app = express()
 const bodyParser = require('body-parser')
+const logger = require('morgan')
+const errorhandler = require('errorhandler')
 
+let store = {}
+store.accounts = []
+
+let app = express()
 app.use(bodyParser.json())
+app.use(logger('dev'))
+app.use(errorhandler())
 
 let profile = [{
     first_name:"Rami", 
     last_name:"Mhanna"
 }]
 
-app.get('/profile', (req,res) => {
-    if (req.query.id) return res.send(profile[req.query.id])
-    res.send(profile)
+app.get('/accounts', (req,res) => {
+    res.status(200).send(store.accounts)
 })
 
-app.post('/profile', (req, res) => {
-    if (!req.body.first_name.trim() || !req.body.last_name.trim()) {
-        //Client Error
-        return res.sendStatus(400)
-    }
-    let obj = {
-        first_name : req.body.first_name,
-        last_name : req.body.last_name
-    }
-    profile.push(obj)
-    console.log('created', profile)
-    res.sendStatus(201)
+app.post('/accounts', (req, res) => {
+    let newAccount = req.body
+    let id = store.accounts.length
+    store.accounts.push(newAccount)
+    res.status(201).send({id: id})
+  })
+
+app.put('/accounts/:id', (req, res) => {
+    store.accounts[req.params.id] = req.body
+    res.status(200).send(store.accounts[req.params.id])
 })
 
-app.put('/profile/:id', (req, res) => {
-    Object.assign(profile[req.params.id], req.body)
-    console.log('updated', profile[req.params.id])
-    res.sendStatus(204)
-})
-
-app.delete('/profile/:id', (req, res) => {
-    profile.splice(req.params.id, 1)
-    console.log('deleted', profile)
-    res.sendStatus(204)
+app.delete('/accounts/:id', (req, res) => {
+    store.accounts.splice(req.params.id, 1)
+    res.status(204).send()
 })
 
 app.listen(3000)
