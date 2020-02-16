@@ -48,10 +48,7 @@ app.post('/api/customers', (req, res) => {
     const { error } = validateCustomer(req.body) // result.error (object distructure)
 
     //if invalid, return 400 - bad request
-    if (error) {
-        res.status(400).send(error.details[0].message)
-        return
-    }
+    if (error) return res.status(400).send(error.details[0].message)
     const customer = {
         id: customers.length + 1,
         name: req.body.name.trim(),
@@ -74,10 +71,7 @@ app.put('/api/customers/:id', (req, res) => {
     const { error } = validateCustomer(req.body) // result.error (object distructure)
 
     //if invalid, return 400 - bad request
-    if (error) {
-        res.status(400).send(error.details[0].message)
-        return
-    }
+    if (error) return res.status(400).send(error.details[0].message)
 
     //Update customer
     customer.name = req.body.name
@@ -86,6 +80,17 @@ app.put('/api/customers/:id', (req, res) => {
     customer.address = req.body.address
 
     //return the updated customer
+    res.send(customer)
+
+})
+
+app.delete('/api/customers/:id', (req, res) => {
+    var customer = customers.find(c => c.id === parseInt(req.params.id))
+    if (!customer) return res.status(404).send('The customer with the given id is not found')
+
+    const index = customers.indexOf(customer)
+    customers.splice(index, 1)
+
     res.send(customer)
 
 })
