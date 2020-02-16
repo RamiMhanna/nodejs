@@ -45,13 +45,11 @@ app.get('/api/customers/:id', (req, res) => {
 })
 
 app.post('/api/customers', (req, res) => {
-    const schema = {
-        name: Joi.string().min(3).required()
-    }
-    const result = Joi.validate(req.body, schema)
-    console.log(result)
-    if (result.error) {
-        res.status(400).send(result.error.details[0].message)
+    const { error } = validateCustomer(req.body) // result.error (object distructure)
+
+    //if invalid, return 400 - bad request
+    if (error) {
+        res.status(400).send(error.details[0].message)
         return
     }
     const customer = {
@@ -72,20 +70,12 @@ app.put('/api/customers/:id', (req, res) => {
 
     //if it is not exsiting return 404
     if (!customer) return res.status(404).send('The customer with the given id is not found')
-     
-
-    //validate
-    const schema = {
-        name: Joi.string().min(3).required(),
-        company: Joi.string().min(3).required(),
-        tel: Joi.string().min(3).required(),
-        address: Joi.string().min(3).required()
-    }
-    const result = Joi.validate(req.body, schema)
+    
+    const { error } = validateCustomer(req.body) // result.error (object distructure)
 
     //if invalid, return 400 - bad request
-    if (result.error) {
-        res.status(400).send(result.error.details[0].message)
+    if (error) {
+        res.status(400).send(error.details[0].message)
         return
     }
 
@@ -99,6 +89,17 @@ app.put('/api/customers/:id', (req, res) => {
     res.send(customer)
 
 })
+
+function validateCustomer(customer)  {
+    //validate
+    const schema = {
+        name: Joi.string().min(3).required(),
+        company: Joi.string().min(3).required(),
+        tel: Joi.string().min(3).required(),
+        address: Joi.string().min(3).required()
+    }
+    return   Joi.validate(customer, schema)
+}
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`)
